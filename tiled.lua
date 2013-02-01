@@ -1,49 +1,70 @@
 -- Project: Corona Tiled Map Loader 0.1
 --
 -- Date: November 24, 2012
-----
- --Version: 0.1
-
- --File name: tiled.lua
-
- --Author: Michael Wilson / NO2 Games, Inc. - www.no2games.com
-
- --Update History:
-
- --0.1 - Initial release
- 
- --Loads JSON saved map files from Tiled http://www.mapeditor.org/
-
- --SUPPORTED
- --JSON saved map files
- --Multiple Layers
- --Multiple Tilesets
- --Margins and spacing
- --Uses Corona Image Maps and Image Map groups if you limit yourself
- --to a single tileset image
- 
- --NOT SUPPORTED
- --TMX files
- --Offsets
- --Object types (regular, polygon, line)
- --Properties
- --Transparent colors
- --External tilesets
- --zlib/gzip compression
- --Isometric maps
- --Flipped and rotated tiles
- --Saving loaded maps
+--
+-- Version: 0.1
+--
+-- File name: tiled.lua
+--
+-- Author: Michael Wilson / NO2 Games, Inc. - www.no2games.com
+--
+-- Update History:
+--
+-- 0.1 - Initial release
+-- 
+-- Loads JSON saved map files from Tiled http://www.mapeditor.org/
+--
+-- SUPPORTED
+-- JSON saved map files
+-- Multiple Layers
+-- Multiple Tilesets
+-- Margins and spacing
+-- Uses Corona Image Maps and Image Map groups if you limit yourself
+-- to a single tileset image
+-- 
+-- NOT SUPPORTED
+-- TMX files
+-- Offsets
+-- Object types (regular, polygon, line)
+-- Properties
+-- Transparent colors
+-- External tilesets
+-- zlib/gzip compression
+-- Isometric maps
+-- Flipped and rotated tiles
+-- Saving loaded maps
 
 local tiledMap = {}
 local tiledMap_mt = { __index = tiledMap }
 
 local json = require "json"
 
+local function printTable( t, label, level )
+	if label then print( label ) end
+	level = level or 1
+
+	if t then
+		for k,v in pairs( t ) do
+			local prefix = ""
+			for i=1,level do
+				prefix = prefix .. "\t"
+			end
+
+			print( prefix .. "[" .. tostring(k) .. "] = " .. tostring(v) )
+			if type( v ) == "table" then
+				print( prefix .. "{" )
+				printTable( v, nil, level + 1 )
+				print( prefix .. "}" )
+			end
+		end
+	end
+end
+
 function tiledMap:load( mapFile )
 
-  -- Helper function to load JSON file
+	-- Helper function to load JSON/TMX files
 	
-	local jsonFile = function( filename, base )
+	local function getFile( filename, base )
 		if not base then base = system.ResourceDirectory; end
 		local path = system.pathForFile( filename, base )
 		local contents
@@ -52,10 +73,20 @@ function tiledMap:load( mapFile )
 		   contents = file:read( "*a" )
 		   io.close( file )	-- close the file after using it
 		end
+		--print(contents)
 		return contents
 	end
 	
-	local mapData = json.decode( jsonFile( mapFile ) )
+	local mapData
+	if string.match(string.upper(mapFile), ".JSON") then
+		mapData = json.decode( getFile( mapFile ) )
+		printTable(mapData)
+	elseif string.match(string.upper(mapFile), ".LUA") then 
+		mapData = require(string.gsub(mapFile, '\....$',''))
+	elseif string.match(string.upper(mapFile), ".TMX") then 
+		assert("No support for TMX files")
+	end
+	
 	local mapGroup = display.newGroup()
 	
 	local mapLayers = #mapData.layers; print( "layers", mapLayers)
