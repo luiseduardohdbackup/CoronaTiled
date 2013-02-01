@@ -19,7 +19,7 @@ display.setStatusBar( display.HiddenStatusBar )
 
 tiledMap = require("tiled")
 
-map = tiledMap:load("desert.lua")
+map = tiledMap:load("desert.json")
 
 function map:touch( event )
     if event.phase == "began" then
@@ -33,5 +33,32 @@ function map:touch( event )
     return true
 end
 
+function showFps()
+	local prevTime = 0
+	local curTime = 0
+	local dt = 0       
+	local fps = 50
+	local mem = 0
+
+	local underlay = display.newRect(0, 0, display.contentWidth, 16)   
+	underlay:setFillColor(0, 0, 0, 128)             
+	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 12)
+	displayInfo:setReferencePoint(display.CenterReferencePoint)
+	displayInfo.x=display.contentWidth/2
+	local function updateText()
+		curTime = system.getTimer()
+		dt = curTime - prevTime
+		prevTime = curTime
+		fps = math.floor(1000 / dt)
+		mem = system.getInfo("textureMemoryUsed") / 1000000
+		if fps > 60 then fps = 60; end
+		displayInfo.text = "FPS: " .. fps .. " MEM: ".. string.sub(mem, 1, string.len(mem) - 4) .. "mb"
+		underlay:toFront()
+		displayInfo:toFront()
+	end
+	Runtime:addEventListener("enterFrame", updateText)
+end
+
+showFps()
 map:addEventListener( "touch", map )
 

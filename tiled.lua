@@ -73,14 +73,12 @@ function tiledMap:load( mapFile )
 		   contents = file:read( "*a" )
 		   io.close( file )	-- close the file after using it
 		end
-		--print(contents)
 		return contents
 	end
 	
 	local mapData
 	if string.match(string.upper(mapFile), ".JSON") then
 		mapData = json.decode( getFile( mapFile ) )
-		printTable(mapData)
 	elseif string.match(string.upper(mapFile), ".LUA") then 
 		mapData = require(string.gsub(mapFile, '\....$',''))
 	elseif string.match(string.upper(mapFile), ".TMX") then 
@@ -167,6 +165,7 @@ function tiledMap:load( mapFile )
 				end
 			end
 			layerGroup.alpha = mapData.layers[layers].opacity
+			layerGroup.isVisible = mapData.layers[layers].visible
 			mapGroup:insert(layerGroup)
 		end
 	end
