@@ -2,7 +2,7 @@
 --
 -- Date: November 24, 2012
 --
--- Version: 0.1
+-- Version: 0.2
 --
 -- File name: main.lua
 --
@@ -11,15 +11,22 @@
 -- Update History:
 --
 -- 0.1 - Initial release
+-- 0.2 - Corona Specific Demo Project + Physics
 -- 
 -- Loads JSON saved map files from Tiled http://www.mapeditor.org/
 --
 
 display.setStatusBar( display.HiddenStatusBar )
 
+local physics=require("physics")
+physics.setDrawMode( "hybrid" )
+physics.start()
 tiledMap = require("tiled")
 
-map = tiledMap:load("desert.json")
+map = tiledMap:load("demo.json")
+map:setReferencePoint(display.CenterReferencePoint)
+map.x = display.contentCenterX
+map.y = display.contentCenterY
 
 function map:touch( event )
     if event.phase == "began" then
@@ -37,12 +44,12 @@ function showFps()
 	local prevTime = 0
 	local curTime = 0
 	local dt = 0       
-	local fps = 50
+	local fps = 60
 	local mem = 0
 
-	local underlay = display.newRect(0, 0, display.contentWidth, 16)   
+	local underlay = display.newRect(0, 0, display.contentWidth, 32)   
 	underlay:setFillColor(0, 0, 0, 128)             
-	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 12)
+	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 24)
 	displayInfo:setReferencePoint(display.CenterReferencePoint)
 	displayInfo.x=display.contentWidth/2
 	local function updateText()
