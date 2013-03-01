@@ -101,18 +101,35 @@
    <property name="objects:bodyType" value="dynamic"/>
    <property name="physics:enabled" value="true"/>
   </properties>
-  <object gid="148" x="96" y="85"/>
-  <object gid="148" x="215" y="123"/>
+  <object gid="148" x="96" y="85">
+   <properties>
+    <property name="alpha" value=".5"/>
+   </properties>
+  </object>
+  <object gid="148" x="215" y="123">
+   <properties>
+    <property name="rotation" value="45"/>
+   </properties>
+  </object>
   <object gid="148" x="351" y="101"/>
   <object gid="148" x="152" y="160"/>
   <object gid="148" x="187" y="61"/>
   <object gid="148" x="268" y="121"/>
   <object gid="148" x="312" y="187"/>
-  <object gid="148" x="232" y="204"/>
+  <object gid="148" x="232" y="204">
+   <properties>
+    <property name="xScale" value="1.75"/>
+    <property name="yScale" value="1.75"/>
+   </properties>
+  </object>
   <object gid="148" x="88" y="156"/>
   <object gid="148" x="37" y="81"/>
   <object gid="148" x="377" y="156"/>
   <object gid="148" x="283" y="53"/>
-  <object gid="148" x="404" y="55"/>
+  <object gid="148" x="404" y="55">
+   <properties>
+    <property name="rotation" value="62"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

@@ -176,7 +176,7 @@
                  "name":"",
                  "properties":
                     {
-
+                     "alpha":".5"
                     },
                  "type":"",
                  "visible":true,
@@ -190,7 +190,7 @@
                  "name":"",
                  "properties":
                     {
-
+                     "rotation":"45"
                     },
                  "type":"",
                  "visible":true,
@@ -274,7 +274,8 @@
                  "name":"",
                  "properties":
                     {
-
+                     "xScale":"1.75",
+                     "yScale":"1.75"
                     },
                  "type":"",
                  "visible":true,
@@ -344,7 +345,7 @@
                  "name":"",
                  "properties":
                     {
-
+                     "rotation":"62"
                     },
                  "type":"",
                  "visible":true,

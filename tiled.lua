@@ -62,6 +62,21 @@ local function printTable( t, label, level )
 	end
 end
 
+local function tableMerge(t1, t2)
+	for k,v in pairs(t2) do
+		if type(v) == "table" then
+			if type(t1[k] or false) == "table" then
+				tableMerge(t1[k] or {}, t2[k] or {})
+			else
+				t1[k] = v
+			end
+		else
+			t1[k] = v
+		end
+	end
+	return t1
+end
+
 local function strRight(str,pattern)
 	local s,e = str:find(pattern)
 	local ret
@@ -294,7 +309,11 @@ function tiledMap:load( mapFile )
 						-- set other properties
 						for k, v in pairs(layerGroup.objectProperties) do
 							ellipse[k]=layerGroup.objectProperties[k]
-						end		
+						end
+						--set Object properties
+						for k, v in pairs(mapData.layers[layers].objects[i].properties) do
+							image[k]=mapData.layers[layers].objects[i].properties[k]
+						end					
 					else
 						local ellipse = display.newCircle( layerGroup, ex + (ew / 2), ey + (eh / 2), eh / 2)
 						ellipse.xScale = (ew / eh)
@@ -306,7 +325,11 @@ function tiledMap:load( mapFile )
 						-- set other properties
 						for k, v in pairs(layerGroup.objectProperties) do
 							ellipse[k]=layerGroup.objectProperties[k]
-						end		
+						end
+						--set Object properties
+						for k, v in pairs(mapData.layers[layers].objects[i].properties) do
+							image[k]=mapData.layers[layers].objects[i].properties[k]
+						end					
 					end
 				elseif mapData.layers[layers].objects[i].polygon then
 					local points = mapData.layers[layers].objects[i].polygon
@@ -332,6 +355,10 @@ function tiledMap:load( mapFile )
 					-- set other properties
 					for k, v in pairs(layerGroup.objectProperties) do
 						polygon[k]=layerGroup.objectProperties[k]
+					end	
+					--set Object properties
+					for k, v in pairs(mapData.layers[layers].objects[i].properties) do
+						image[k]=mapData.layers[layers].objects[i].properties[k]
 					end					
 					layerGroup:insert(polygon)
 				elseif mapData.layers[layers].objects[i].polyline then
@@ -358,7 +385,11 @@ function tiledMap:load( mapFile )
 					-- set other properties
 					for k, v in pairs(layerGroup.objectProperties) do
 						line[k]=layerGroup.objectProperties[k]
-					end							
+					end
+					--set Object properties
+					for k, v in pairs(mapData.layers[layers].objects[i].properties) do
+						image[k]=mapData.layers[layers].objects[i].properties[k]
+					end					
 					layerGroup:insert(line)
 				elseif mapData.layers[layers].objects[i].gid then --image object
 					for sets = 1, #mapData.tilesets do
@@ -373,10 +404,15 @@ function tiledMap:load( mapFile )
 								if layerGroup.physicsData.enabled==true then
 									physics.addBody(image, "static", layerGroup.physicsData)
 								end
-								-- set other properties
+								-- set other layer properties
 								for k, v in pairs(layerGroup.objectProperties) do
 									image[k]=layerGroup.objectProperties[k]
 								end
+								--set Object properties
+								for k, v in pairs(mapData.layers[layers].objects[i].properties) do
+									image[k]=mapData.layers[layers].objects[i].properties[k]
+								end
+								mergedProperties =  nil
 								layerGroup:insert( image )
 								image.x = mapData.layers[layers].objects[i].x 
 								image.y = mapData.layers[layers].objects[i].y							
