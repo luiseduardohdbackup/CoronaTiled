@@ -16,6 +16,8 @@
 -- Loads JSON saved map files from Tiled http://www.mapeditor.org/
 --
 
+require('mobdebug').start()
+
 display.setStatusBar( display.HiddenStatusBar )
 
 local physics=require("physics")

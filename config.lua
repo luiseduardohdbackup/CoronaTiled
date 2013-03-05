@@ -1,10 +1,10 @@
 application = 
     {
-        content =
+        content = --iPhone 5 default, stretch to rest
         {
             width = 480,
             height = 960,
-            scale = "strech",
+            scale = "stretch",
             xAlign = "center",
             yAlign = "center",
             fps = 60,

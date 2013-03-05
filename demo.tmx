@@ -95,6 +95,18 @@
   <object x="391" y="628">
    <polyline points="0,0 -131,104"/>
   </object>
+  <object x="255" y="251">
+   <polygon points="0,0 33,28 20,51 -17,60 -41,23 -21,3"/>
+  </object>
+  <object x="108" y="180" width="53" height="54">
+   <properties>
+    <property name="bodyType" value="dynamic"/>
+   </properties>
+   <ellipse/>
+  </object>
+  <object x="337" y="235">
+   <polygon points="0,0 45,25 -5,78"/>
+  </object>
  </objectgroup>
  <objectgroup name="boxes" width="15" height="30">
   <properties>

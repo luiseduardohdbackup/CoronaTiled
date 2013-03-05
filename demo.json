@@ -154,6 +154,84 @@
                  "width":0,
                  "x":391,
                  "y":628
+                }, 
+                {
+                 "height":0,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":33,
+                         "y":28
+                        }, 
+                        {
+                         "x":20,
+                         "y":51
+                        }, 
+                        {
+                         "x":-17,
+                         "y":60
+                        }, 
+                        {
+                         "x":-41,
+                         "y":23
+                        }, 
+                        {
+                         "x":-21,
+                         "y":3
+                        }],
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":255,
+                 "y":251
+                }, 
+                {
+                 "ellipse":true,
+                 "height":54,
+                 "name":"",
+                 "properties":
+                    {
+                     "bodyType":"dynamic"
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":53,
+                 "x":108,
+                 "y":180
+                }, 
+                {
+                 "height":0,
+                 "name":"",
+                 "polygon":[
+                        {
+                         "x":0,
+                         "y":0
+                        }, 
+                        {
+                         "x":45,
+                         "y":25
+                        }, 
+                        {
+                         "x":-5,
+                         "y":78
+                        }],
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":337,
+                 "y":235
                 }],
          "opacity":1,
          "properties":

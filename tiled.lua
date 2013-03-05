@@ -11,7 +11,7 @@
 -- Update History:
 --
 -- 0.1 - Initial release
--- 0.2 - GridMap+Tiled release
+-- 0.2 - Corona Specific Demo Project + Physics
 --
 -- Loads JSON saved map files from Tiled http://www.mapeditor.org/
 --
@@ -62,21 +62,6 @@ local function printTable( t, label, level )
 	end
 end
 
-local function tableMerge(t1, t2)
-	for k,v in pairs(t2) do
-		if type(v) == "table" then
-			if type(t1[k] or false) == "table" then
-				tableMerge(t1[k] or {}, t2[k] or {})
-			else
-				t1[k] = v
-			end
-		else
-			t1[k] = v
-		end
-	end
-	return t1
-end
-
 local function strRight(str,pattern)
 	local s,e = str:find(pattern)
 	local ret
@@ -91,6 +76,38 @@ local function isNumeric(str)
 	return tonumber(str) and true or false 
 end
 
+local pointsCenterPoint = {}
+
+local function getCenterPointOfPoints(points)
+    local pointsSum = {x = 0, y = 0}
+    for i = 1, #points do pointsSum.x = pointsSum.x + points[i].x; pointsSum.y = pointsSum.y + points[i].y end
+    return {x = pointsSum.x / #points, y = pointsSum.y / #points}
+end
+
+local function getIsLess(a, b)
+    local center = pointsCenterPoint
+ 
+    if a.x >= 0 and b.x < 0 then return true
+    elseif a.x == 0 and b.x == 0 then return a.y > b.y
+    end
+ 
+    local det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y)
+    if det < 0 then return true
+    elseif det > 0 then return false
+    end
+ 
+    local d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y)
+    local d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y)
+    return d1 > d2
+end
+
+local function sortPointsClockwise(points)
+    local centerPoint = getCenterPointOfPoints(points)
+    pointsCenterPoint = centerPoint
+    table.sort(points, getIsLess)
+    return points
+end
+ 
 function tiledMap:load( mapFile )
 
 	-- Helper function to load JSON/TMX files
@@ -248,9 +265,10 @@ function tiledMap:load( mapFile )
 			layerGroup.alpha = mapData.layers[layers].opacity
 			layerGroup.isVisible = mapData.layers[layers].visible
 			mapGroup:insert(layerGroup)
+		
 		elseif mapData.layers[layers].type=="objectgroup" then -- process Object layer
+		
 			local layerGroup = display.newGroup() 
-			
 			local properties=mapData.layers[layers].properties
 			layerGroup.properties={}
 			layerGroup.physicsData={}
@@ -292,7 +310,7 @@ function tiledMap:load( mapFile )
 			end
 		
 			for i=1, #mapData.layers[layers].objects do
-				if mapData.layers[layers].objects[i].ellipse then
+				if mapData.layers[layers].objects[i].ellipse then -- Circles
 					local ex = mapData.layers[layers].objects[i].x 
 					local ey = mapData.layers[layers].objects[i].y 
 					local ew = mapData.layers[layers].objects[i].width 
@@ -328,24 +346,24 @@ function tiledMap:load( mapFile )
 						end
 						--set Object properties
 						for k, v in pairs(mapData.layers[layers].objects[i].properties) do
-							image[k]=mapData.layers[layers].objects[i].properties[k]
+							ellipse[k]=mapData.layers[layers].objects[i].properties[k]
 						end					
 					end
-				elseif mapData.layers[layers].objects[i].polygon then
+				elseif mapData.layers[layers].objects[i].polygon then -- Polygon
 					local points = mapData.layers[layers].objects[i].polygon
 					local polygon = display.newLine( points[1].x, points[1].y, points[2].x, points[2].y)
 					for i = 3, #points do
 						polygon:append(points[i].x, points[i].y)
 					end
 					polygon:append(points[1].x, points[1].y)
-					local shape = {}
-					local point = 1
-					for i = 1, math.min(#points,8) do
-						shape[point],shape[point+1] = points[i].x, points[i].y
-						point=point + 2
-					end
-					--shape[point],shape[point + 1] = 0,0
 					if layerGroup.physicsData.enabled==true then
+						local shape = {}
+						local point = 1
+						local sortedPoints=points -- not quite there with the sorting
+						for i = 1, math.min(#sortedPoints,8) do
+							shape[point],shape[point+1] = sortedPoints[i].x, sortedPoints[i].y
+							point=point + 2
+						end
 						layerGroup.physicsData.shape = shape
 						physics.addBody(polygon,  "static", layerGroup.physicsData)
 						layerGroup.physicsData.shape = nil
@@ -358,10 +376,10 @@ function tiledMap:load( mapFile )
 					end	
 					--set Object properties
 					for k, v in pairs(mapData.layers[layers].objects[i].properties) do
-						image[k]=mapData.layers[layers].objects[i].properties[k]
+						polygon[k]=mapData.layers[layers].objects[i].properties[k]
 					end					
 					layerGroup:insert(polygon)
-				elseif mapData.layers[layers].objects[i].polyline then
+				elseif mapData.layers[layers].objects[i].polyline then -- Lines
 					local points = mapData.layers[layers].objects[i].polyline						
 					local line = display.newLine( points[1].x, points[1].y ,points[2].x, points[2].y)
 					if #points > 2 then
@@ -388,10 +406,10 @@ function tiledMap:load( mapFile )
 					end
 					--set Object properties
 					for k, v in pairs(mapData.layers[layers].objects[i].properties) do
-						image[k]=mapData.layers[layers].objects[i].properties[k]
+						line[k]=mapData.layers[layers].objects[i].properties[k]
 					end					
 					layerGroup:insert(line)
-				elseif mapData.layers[layers].objects[i].gid then --image object
+				elseif mapData.layers[layers].objects[i].gid then --Image object
 					for sets = 1, #mapData.tilesets do
 						local firstgid = mapData.tilesets[sets].firstgid
 						local lastgid = firstgid + #sheetFrames[sets] + 1
@@ -419,7 +437,7 @@ function tiledMap:load( mapFile )
 							end
 						end
 					end
-				else
+				else -- All else fails, make a RECT
 					local rx = mapData.layers[layers].objects[i].x 
 					local ry = mapData.layers[layers].objects[i].y 
 					local rw = mapData.layers[layers].objects[i].width 
@@ -438,7 +456,9 @@ function tiledMap:load( mapFile )
 			layerGroup.alpha = mapData.layers[layers].opacity
 			layerGroup.isVisible = mapData.layers[layers].visible
 			mapGroup:insert(layerGroup)
+		
 		elseif mapData.layers[layers].type=="imagelayer" then -- process Image layer		
+		
 			local ix = mapData.layers[layers].x 
 			local iy = mapData.layers[layers].y 
 			imageLayer = display.newImage(mapData.layers[layers].image,ix,iy,true)
