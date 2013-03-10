@@ -12,11 +12,12 @@
 --
 -- 0.1 - Initial release
 -- 0.2 - Corona Specific Demo Project + Physics
+-- 0.3 - Bugfixes & starting TMX support
 -- 
--- Loads JSON saved map files from Tiled http://www.mapeditor.org/
+-- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
 
-require('mobdebug').start()
+--require('mobdebug').start()
 
 display.setStatusBar( display.HiddenStatusBar )
 
@@ -49,9 +50,9 @@ function showFps()
 	local fps = 60
 	local mem = 0
 
-	local underlay = display.newRect(0, 0, display.contentWidth, 32)   
+	local underlay = display.newRect(0, 0, display.contentWidth, 34)   
 	underlay:setFillColor(0, 0, 0, 128)             
-	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 24)
+	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 22)
 	displayInfo:setReferencePoint(display.CenterReferencePoint)
 	displayInfo.x=display.contentWidth/2
 	local function updateText()

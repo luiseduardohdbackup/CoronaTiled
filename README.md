@@ -7,8 +7,8 @@ Version: 0.2
 
 Update History:
 
-0.1 - Initial release
-0.2 - GridMap+Tiled release
+* 0.1 - Initial release
+* 0.2 - GridMap+Tiled release
 
 Loads JSON saved map files from Tiled http://www.mapeditor.org/
 
