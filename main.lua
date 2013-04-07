@@ -2,7 +2,7 @@
 --
 -- Date: November 24, 2012
 --
--- Version: 0.2
+-- Version: 0.4
 --
 -- File name: main.lua
 --
@@ -13,6 +13,7 @@
 -- 0.1 - Initial release
 -- 0.2 - Corona Specific Demo Project + Physics
 -- 0.3 - Bugfixes & starting TMX support
+-- 0.4 - Load a map region & tile properties including shapes
 -- 
 -- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
@@ -50,7 +51,7 @@ function showFps()
 	local fps = 60
 	local mem = 0
 
-	local underlay = display.newRect(0, 0, display.contentWidth, 34)   
+	local underlay = display.newRect(0, 0, display.contentWidth, 32)   
 	underlay:setFillColor(0, 0, 0, 128)             
 	local displayInfo = display.newText("FPS: " .. fps .. " - Memory: ".. mem .. "mb", 0, 0, native.systemFont, 22)
 	displayInfo:setReferencePoint(display.CenterReferencePoint)

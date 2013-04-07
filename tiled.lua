@@ -2,7 +2,7 @@
 --
 -- Date: November 24, 2012
 --
--- Version: 0.1
+-- Version: 0.4
 --
 -- File name: tiled.lua
 --
@@ -13,6 +13,7 @@
 -- 0.1 - Initial release
 -- 0.2 - Corona Specific Demo Project + Physics
 -- 0.3 - Bugfixes & starting TMX support
+-- 0.4 - Load a map region & tile properties including shapes
 -- 
 -- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
@@ -62,6 +63,32 @@ local function printTable( t, label, level )
 			end
 		end
 	end
+end
+
+function split(inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        t={} ; i=1
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                t[i] = str
+                i = i + 1
+        end
+        return t
+end
+
+function copyTable(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in pairs(orig) do
+            copy[orig_key] = orig_value
+        end
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
 end
 
 local function strRight(str,pattern)
@@ -172,7 +199,7 @@ local function saveTable(t, filename)
     end
 end
 
-function tiledMap:load( mapFile )
+function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 
 	-- Helper function to load JSON/TMX files
 	
@@ -242,6 +269,7 @@ function tiledMap:load( mapFile )
 				table.insert( frames, gid, element )
 			end
 		end
+		print("Looking for tiles in:" .. string.match(tileSet.image,'([%w_]+%.%w%w%w)$'))
 		imageSheets[sets] = graphics.newImageSheet(string.match(tileSet.image,'([%w_]+%.%w%w%w)$'), options )
 		print("tileset",string.match(tileSet.image,'([%w_]+%.%w%w%w)$'))
 		sheetFrames[sets] = frames
@@ -300,37 +328,57 @@ function tiledMap:load( mapFile )
 			end
 			
 			-- Render Map
-			
-			local item = 0
-			for j=1, mapHeight do
-				for i=1, mapWidth do
-					item = item + 1
-					for sets = 1, #mapData.tilesets do
-						local firstgid = mapData.tilesets[sets].firstgid
-						local lastgid = firstgid + #sheetFrames[sets] + 1
-						local tileNumber = mapData.layers[layers].data[item]
-						tileNumber = math.max(0, tileNumber - firstgid + 1)
-						if tileNumber > 0 then 
-							if tileNumber < lastgid - firstgid then
-								local tile = display.newImage( imageSheets[sets], tileNumber, (i-1)*tileWidth, (j-1)*tileHeight )
+			      
+      local item = 0 
+      local visibleMapTop = chunkTop or 1
+      local visibleMapLeft = chunkLeft or 1
+      local visibleMapWidth = chunkWidth or mapWidth
+      local visibleMapHeight = chunkHeight or mapHeight
+      for j=visibleMapTop, visibleMapHeight do
+        for i=visibleMapLeft, visibleMapWidth do
+          item = (j * mapWidth-1) + i + visibleMapLeft
+          for sets = 1, #mapData.tilesets do
+            local firstgid = mapData.tilesets[sets].firstgid
+            local lastgid = firstgid + #sheetFrames[sets] + 1
+            local tileNumber = mapData.layers[layers].data[item] or 0
+            tileNumber = math.max(0, tileNumber - firstgid + 1)
+            if tileNumber > 0 then 
+              if tileNumber < lastgid - firstgid then
+                local tile = display.newImage( imageSheets[sets], tileNumber, (i-1)*tileWidth, (j-1)*tileHeight )
+                -- set other properties
+                for k, v in pairs(layerGroup.tileProperties) do
+                  tile[k]=layerGroup.tileProperties[k]
+                end
+                -- set tile properties from tileset								
+                if mapData.tilesets[sets].tileproperties then		
+									for k, v in pairs(mapData.tilesets[sets].tileproperties) do
+										if tonumber(k) == tileNumber+firstgid-2 then
+											for sk, sv in pairs(v) do
+												tile[sk]=sv
+											end
+										end 
+									end	
+								end
 								-- set Physics properties
-								if layerGroup.physicsData.enabled==true then
-									physics.addBody(tile, "static", layerGroup.physicsData)
-								end
-								-- set other properties
-								for k, v in pairs(layerGroup.tileProperties) do
-									tile[k]=layerGroup.tileProperties[k]
-								end
-								layerGroup:insert( tile )
-							end
-						end
-					end
-				end
-			end
-			layerGroup.alpha = mapData.layers[layers].opacity
-			layerGroup.isVisible = mapData.layers[layers].visible
-			mapGroup:insert(layerGroup)
-		
+                if layerGroup.physicsData.enabled==true then
+									if tile.shape then
+											local tilePhysicsData = copyTable(layerGroup.physicsData)
+											tilePhysicsData.shape = split(tile.shape,",")
+											physics.addBody(tile, "static", tilePhysicsData)
+									else
+										physics.addBody(tile, "static", layerGroup.physicsData)
+									end
+                end
+                layerGroup:insert(tile)
+              end
+            end
+          end
+        end
+      end
+      layerGroup.alpha = mapData.layers[layers].opacity
+      layerGroup.isVisible = mapData.layers[layers].visible
+      mapGroup:insert(layerGroup)
+      
 		elseif mapData.layers[layers].type=="objectgroup" then -- process Object layer
 		
 			local layerGroup = display.newGroup() 

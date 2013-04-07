@@ -3,12 +3,14 @@ CoronaTiled
 
 Load Tiled Maps into Corona SDK
 
-Version: 0.2
+Version: 0.4
 
 Update History:
 
 * 0.1 - Initial release
 * 0.2 - GridMap+Tiled release
+* 0.3 - Bugfixes & starting TMX support
+* 0.4 - Load a map region & tile properties including shapes
 
 Loads JSON saved map files from Tiled http://www.mapeditor.org/
 
