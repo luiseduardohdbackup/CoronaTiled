@@ -32,6 +32,9 @@ map:setReferencePoint(display.CenterReferencePoint)
 map.x = display.contentCenterX
 map.y = display.contentCenterY
 
+spawnPoint = tiledMap:findObject("spawnPoint",map.data)
+print ("Spawn at ", spawnPoint.x, spawnPoint.y)
+
 function map:touch( event )
     if event.phase == "began" then
         self.markX = self.x    -- store x location of object
@@ -72,4 +75,6 @@ end
 
 showFps()
 map:addEventListener( "touch", map )
+
+
 

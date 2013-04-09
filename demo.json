@@ -232,6 +232,19 @@
                  "width":0,
                  "x":337,
                  "y":235
+                }, 
+                {
+                 "height":40,
+                 "name":"spawnPoint",
+                 "properties":
+                    {
+
+                    },
+                 "type":"",
+                 "visible":true,
+                 "width":43,
+                 "x":26,
+                 "y":140
                 }],
          "opacity":1,
          "properties":

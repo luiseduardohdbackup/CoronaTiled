@@ -601,6 +601,21 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 	return mapGroup
 end
 
+function tiledMap:findObject(name,mapData)
+	local mapLayers = #mapData.layers; print( "layers", mapLayers)
+	local object
+	for layers=1, mapLayers do 
+		if mapData.layers[layers].type=="objectgroup" then -- search Object layer		
+			for i=1, #mapData.layers[layers].objects do
+				if mapData.layers[layers].objects[i].name == name then
+					object = copyTable(mapData.layers[layers].objects[i])
+				end
+			end
+		end
+	end
+	return object
+end
+
 function tiledMap:destroy()
 	-- Nothing to Destroy, yet
 end

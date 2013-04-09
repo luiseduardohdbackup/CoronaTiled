@@ -120,6 +120,7 @@
   <object x="337" y="235">
    <polygon points="0,0 45,25 -5,78"/>
   </object>
+  <object name="spawnPoint" x="26" y="140" width="43" height="40"/>
  </objectgroup>
  <objectgroup name="boxes" width="15" height="30">
   <properties>
