@@ -269,7 +269,7 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 				table.insert( frames, gid, element )
 			end
 		end
-		print("Looking for tiles in:" .. string.match(tileSet.image,'([%w_]+%.%w%w%w)$'))
+		print("Looking for tiles in: " .. string.match(tileSet.image,'([%w_]+%.%w%w%w)$'))
 		imageSheets[sets] = graphics.newImageSheet(string.match(tileSet.image,'([%w_]+%.%w%w%w)$'), options )
 		print("tileset",string.match(tileSet.image,'([%w_]+%.%w%w%w)$'))
 		sheetFrames[sets] = frames
@@ -385,28 +385,32 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 			local properties=mapData.layers[layers].properties
 			layerGroup.properties={}
 			layerGroup.physicsData={}
+			layerGroup.physicsData.filter={}
 			layerGroup.objectProperties={}
 			
 			if properties then
 				for k, v in pairs(properties) do
 					if string.find(string.lower(k), "physics:")~=nil then
 						layerGroup.physicsData[strRight(k, ":")]=properties[k]
-					if layerGroup.physicsData[strRight(k, ":")]=="true" then
-						layerGroup.physicsData[strRight(k, ":")]=true
-					elseif layerGroup.physicsData[strRight(k, ":")]=="false" then
-						layerGroup.physicsData[strRight(k, ":")]=false
-					elseif isNumeric(layerGroup.physicsData[strRight(k, ":")])==true then
-						layerGroup.physicsData[strRight(k, ":")]=tonumber(layerGroup.physicsData[strRight(k, ":")])
-					end
+						if layerGroup.physicsData[strRight(k, ":")]=="true" then
+							layerGroup.physicsData[strRight(k, ":")]=true
+						elseif layerGroup.physicsData[strRight(k, ":")]=="false" then
+							layerGroup.physicsData[strRight(k, ":")]=false
+						elseif isNumeric(layerGroup.physicsData[strRight(k, ":")])==true then
+							layerGroup.physicsData[strRight(k, ":")]=tonumber(layerGroup.physicsData[strRight(k, ":")])
+						end
+					elseif string.find(string.lower(k), "collision:")~=nil then
+						layerGroup.physicsData.filter[strRight(k, ":")]=properties[k]
+						layerGroup.physicsData.filter[strRight(k, ":")]=tonumber(layerGroup.physicsData.filter[strRight(k, ":")])
 					elseif string.find(string.lower(k), "layer:")~=nil then
 						layerGroup[strRight(k, ":")]=properties[k]
-					if layerGroup[strRight(k, ":")]=="true" then
-						layerGroup[strRight(k, ":")]=true
-					elseif layerGroup[strRight(k, ":")]=="false" then
-						layerGroup[strRight(k, ":")]=false
-					elseif isNumeric(layerGroup[strRight(k, ":")])==true then
-						layerGroup[strRight(k, ":")]=tonumber(layerGroup[strRight(k, ":")])
-					end
+						if layerGroup[strRight(k, ":")]=="true" then
+							layerGroup[strRight(k, ":")]=true
+						elseif layerGroup[strRight(k, ":")]=="false" then
+							layerGroup[strRight(k, ":")]=false
+						elseif isNumeric(layerGroup[strRight(k, ":")])==true then
+							layerGroup[strRight(k, ":")]=tonumber(layerGroup[strRight(k, ":")])
+						end
 					elseif string.find(string.lower(k), "objects:")~=nil then
 						layerGroup.objectProperties[strRight(k, ":")]=properties[k]
 						if layerGroup.objectProperties[strRight(k, ":")]=="true" then
