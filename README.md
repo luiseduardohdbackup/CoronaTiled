@@ -11,6 +11,7 @@ Update History:
 * 0.2 - GridMap+Tiled release
 * 0.3 - Bugfixes & starting TMX support
 * 0.4 - Load a map region & tile properties including shapes
+* 0.5 - Bugfixes & Sprite Layers
 
 Loads JSON saved map files from Tiled http://www.mapeditor.org/
 

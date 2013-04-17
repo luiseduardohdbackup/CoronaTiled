@@ -79,7 +79,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,84,0,0,0,0,0,0,0,0,0,0,0,85,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -137,7 +137,6 @@
     <property name="rotation" value="45"/>
    </properties>
   </object>
-  <object gid="148" x="351" y="101"/>
   <object gid="148" x="152" y="160"/>
   <object gid="148" x="187" y="61"/>
   <object gid="148" x="268" y="121"/>
@@ -157,5 +156,16 @@
     <property name="rotation" value="62"/>
    </properties>
   </object>
+ </objectgroup>
+ <objectgroup name="sprites" width="15" height="30">
+  <properties>
+   <property name="sprites:count" value="4"/>
+   <property name="sprites:enabled" value="true"/>
+   <property name="sprites:name" value="sequence"/>
+   <property name="sprites:start" value="76"/>
+   <property name="sprites:time" value="333"/>
+  </properties>
+  <object gid="77" x="416" y="224"/>
+  <object gid="77" x="32" y="224"/>
  </objectgroup>
 </map>

@@ -1,8 +1,9 @@
 -- Project: Corona Tiled Map Loader 0.1
 --
 -- Date: November 24, 2012
+-- Last Update: April 17, 2013
 --
--- Version: 0.4
+-- Version: 0.5
 --
 -- File name: tiled.lua
 --
@@ -14,6 +15,7 @@
 -- 0.2 - Corona Specific Demo Project + Physics
 -- 0.3 - Bugfixes & starting TMX support
 -- 0.4 - Load a map region & tile properties including shapes
+-- 0.5 - Bugfixes & Sprite Layers
 -- 
 -- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
@@ -28,6 +30,7 @@
 -- Object types (regular, polygon, line)
 -- Physics and display object properties
 -- Image Layers
+-- Flipped and rotated tiles
 -- 
 -- NOT SUPPORTED
 -- TMX files
@@ -36,7 +39,7 @@
 -- External tilesets
 -- zlib/gzip compression
 -- Isometric maps
--- Flipped and rotated tiles
+
 -- Saving loaded maps
 
 local tiledMap = {}
@@ -66,15 +69,14 @@ local function printTable( t, label, level )
 end
 
 function split(inputstr, sep)
-        if sep == nil then
-                sep = "%s"
-        end
-        t={} ; i=1
-        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-                t[i] = str
-                i = i + 1
-        end
-        return t
+	sep = sep or "%s"
+	inputstr = inputstr or ""
+	t={} ; i=1
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+		t[i] = str
+		i = i + 1
+	end
+	return t
 end
 
 function copyTable(orig)
@@ -211,6 +213,8 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 		if file then
 		   contents = file:read( "*a" )
 		   io.close( file )	-- close the file after using it
+		else
+			assert(filename .. " not found")
 		end
 		return contents
 	end
@@ -332,11 +336,11 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
       local item = 0 
       local visibleMapTop = chunkTop or 1
       local visibleMapLeft = chunkLeft or 1
-      local visibleMapWidth = chunkWidth or mapWidth
+      local visibleMapWidth = chunkWidth or mapWidth 
       local visibleMapHeight = chunkHeight or mapHeight
       for j=visibleMapTop, visibleMapHeight do
         for i=visibleMapLeft, visibleMapWidth do
-          item = (j * mapWidth-1) + i + visibleMapLeft
+          item = ((j-1) * mapWidth-1) + i + visibleMapLeft
           for sets = 1, #mapData.tilesets do
             local firstgid = mapData.tilesets[sets].firstgid
             local lastgid = firstgid + #sheetFrames[sets] + 1
@@ -345,7 +349,8 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
             if tileNumber > 0 then 
               if tileNumber < lastgid - firstgid then
                 local tile = display.newImage( imageSheets[sets], tileNumber, (i-1)*tileWidth, (j-1)*tileHeight )
-                -- set other properties
+                --tile:setReferencePoint(display.TopLeftReferencePoint)
+								-- set other properties
                 for k, v in pairs(layerGroup.tileProperties) do
                   tile[k]=layerGroup.tileProperties[k]
                 end
@@ -387,6 +392,7 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 			layerGroup.physicsData={}
 			layerGroup.physicsData.filter={}
 			layerGroup.objectProperties={}
+			layerGroup.sequenceData={}			
 			
 			if properties then
 				for k, v in pairs(properties) do
@@ -419,6 +425,15 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 							layerGroup.objectProperties[strRight(k, ":")]=false
 						elseif isNumeric(layerGroup.objectProperties[strRight(k, ":")])==true then
 							layerGroup.objectProperties[strRight(k, ":")]=tonumber(layerGroup.objectProperties[strRight(k, ":")])
+						end
+					elseif string.find(string.lower(k), "sprites:")~=nil then
+						layerGroup.sequenceData[strRight(k, ":")]=properties[k]
+						if layerGroup.sequenceData[strRight(k, ":")]=="true" then
+							layerGroup.sequenceData[strRight(k, ":")]=true
+						elseif layerGroup.sequenceData[strRight(k, ":")]=="false" then
+							layerGroup.sequenceData[strRight(k, ":")]=false
+						elseif isNumeric(layerGroup.sequenceData[strRight(k, ":")])==true then
+							layerGroup.sequenceData[strRight(k, ":")]=tonumber(layerGroup.sequenceData[strRight(k, ":")])
 						end
 					else
 						layerGroup.properties[k]=properties[k]
@@ -533,8 +548,15 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 						local tileNumber = mapData.layers[layers].objects[i].gid
 						tileNumber = math.max(0, tileNumber - firstgid + 1)
 						if tileNumber > 0 then 
-							if tileNumber < lastgid - firstgid then
-								local image = display.newImage( imageSheets[sets], tileNumber)
+							if tileNumber < lastgid - firstgid then								
+								if layerGroup.sequenceData.enabled==true  then
+									--layerGroup.sequenceData.frames = split(layerGroup.sequenceData.frames ,",")
+									image = display.newSprite( imageSheets[sets], layerGroup.sequenceData)
+									image:setSequence(layerGroup.sequenceData.name)
+									image:play()
+								else
+									image = display.newImage( imageSheets[sets], tileNumber)
+								end
 								-- set Physics properties
 								if layerGroup.physicsData.enabled==true then
 									physics.addBody(image, "static", layerGroup.physicsData)
@@ -547,10 +569,10 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 								for k, v in pairs(mapData.layers[layers].objects[i].properties) do
 									image[k]=mapData.layers[layers].objects[i].properties[k]
 								end
-								mergedProperties =  nil
 								layerGroup:insert( image )
 								image.x = mapData.layers[layers].objects[i].x 
-								image.y = mapData.layers[layers].objects[i].y							
+								image.y = mapData.layers[layers].objects[i].y	
+								mapData.layers[layers].objects[i].image = image
 							end
 						end
 					end
@@ -605,19 +627,25 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 	return mapGroup
 end
 
-function tiledMap:findObject(name,mapData)
-	local mapLayers = #mapData.layers; print( "layers", mapLayers)
-	local object
+function tiledMap:findObjects(name,mapData)
+	local mapLayers = #mapData.layers
+	local objects = {}
 	for layers=1, mapLayers do 
 		if mapData.layers[layers].type=="objectgroup" then -- search Object layer		
 			for i=1, #mapData.layers[layers].objects do
 				if mapData.layers[layers].objects[i].name == name then
-					object = copyTable(mapData.layers[layers].objects[i])
+					table.insert(objects,mapData.layers[layers].objects[i])
 				end
 			end
 		end
 	end
-	return object
+	if (#objects == 1) then
+		return objects[1]
+	elseif (#objects == 0) then
+		return nil
+	else
+		return objects
+	end
 end
 
 function tiledMap:destroy()

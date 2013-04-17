@@ -1,8 +1,9 @@
 -- Project: Corona Tiled Map Loader Example 0.1
 --
 -- Date: November 24, 2012
+-- Last Update: April 17, 2013
 --
--- Version: 0.4
+-- Version: 0.5
 --
 -- File name: main.lua
 --
@@ -14,6 +15,7 @@
 -- 0.2 - Corona Specific Demo Project + Physics
 -- 0.3 - Bugfixes & starting TMX support
 -- 0.4 - Load a map region & tile properties including shapes
+-- 0.5 - Bugfixes & Sprite Layers
 -- 
 -- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
@@ -32,7 +34,7 @@ map:setReferencePoint(display.CenterReferencePoint)
 map.x = display.contentCenterX
 map.y = display.contentCenterY
 
-spawnPoint = tiledMap:findObject("spawnPoint",map.data)
+spawnPoint = tiledMap:findObjects("spawnPoint",map.data)
 print ("Spawn at ", spawnPoint.x, spawnPoint.y)
 
 function map:touch( event )
@@ -75,6 +77,3 @@ end
 
 showFps()
 map:addEventListener( "touch", map )
-
-
-
