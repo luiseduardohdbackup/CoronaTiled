@@ -12,6 +12,7 @@ Update History:
 * 0.3 - Bugfixes & starting TMX support
 * 0.4 - Load a map region & tile properties including shapes
 * 0.5 - Bugfixes & Sprite Layers
+* 0.6 - First GUI release and "tile gap" fix
 
 Loads JSON saved map files from Tiled http://www.mapeditor.org/
 
@@ -25,6 +26,7 @@ SUPPORTED
 * Image Objects
 * Physics and display object properties
 * Image Layers
+* GUI Text areas and Touch areas (buttons)
  
 NOT SUPPORTED
 * TMX files

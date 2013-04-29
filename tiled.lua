@@ -1,9 +1,9 @@
 -- Project: Corona Tiled Map Loader 0.1
 --
 -- Date: November 24, 2012
--- Last Update: April 17, 2013
+-- Last Update: April 29, 2013
 --
--- Version: 0.5
+-- Version: 0.6
 --
 -- File name: tiled.lua
 --
@@ -16,31 +16,10 @@
 -- 0.3 - Bugfixes & starting TMX support
 -- 0.4 - Load a map region & tile properties including shapes
 -- 0.5 - Bugfixes & Sprite Layers
+-- 0.6 - First GUI release and "tile gap" fix
 -- 
 -- Loads JSON/LUA saved map files from Tiled http://www.mapeditor.org/
 --
---
--- SUPPORTED
--- JSON/LUA exported map files
--- Multiple Layers
--- Multiple Tilesets
--- Margins and spacing
--- Uses Corona Image Maps and Image Map groups if you limit yourself
--- to a single tileset image
--- Object types (regular, polygon, line)
--- Physics and display object properties
--- Image Layers
--- Flipped and rotated tiles
--- 
--- NOT SUPPORTED
--- TMX files
--- Offsets
--- Transparent colors
--- External tilesets
--- zlib/gzip compression
--- Isometric maps
-
--- Saving loaded maps
 
 local tiledMap = {}
 local tiledMap_mt = { __index = tiledMap }
@@ -66,6 +45,22 @@ local function printTable( t, label, level )
 			end
 		end
 	end
+end
+
+local function hexToRGB(color)
+	if not color or #color < 6 or #color > 8  then 
+		color = "FFFFFF"
+	end
+	if #color == 6 then 
+		color = color .. "FF"
+	end
+	hexColor = {
+    r = tonumber((string.sub(color,1,2)),16),
+    g = tonumber((string.sub(color,3,4)),16),
+    b = tonumber((string.sub(color,5,6)),16),
+		a = tonumber((string.sub(color,7,8)),16),
+  }
+  return hexColor
 end
 
 function split(inputstr, sep)
@@ -238,7 +233,18 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 	local tileHeight = mapData.tileheight; print( "tileheight", tileHeight)
 	local tileWidth = mapData.tilewidth; print( "tilewidth", tileWidth )
 	local version = mapData.version; print( "version", version)
-
+	
+	-- Fix content scale
+	local pixelHeight = tileHeight/display.contentScaleY
+	local pixelWidth = tileWidth/display.contentScaleX
+	local scaledTileHeight = math.floor(pixelHeight)*display.contentScaleY
+	local scaledTileWidth = math.floor(pixelWidth)*display.contentScaleX
+		
+	local contentZoomY = scaledTileHeight / tileHeight
+	local contentZoomX = scaledTileWidth / tileWidth
+	print( "contentZoomY", contentZoomY)
+	print( "contentZoomX", contentZoomX)
+	
 	-- Create the tileset
 	
 	local imageSheets = {}
@@ -348,7 +354,8 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
             tileNumber = math.max(0, tileNumber - firstgid + 1)
             if tileNumber > 0 then 
               if tileNumber < lastgid - firstgid then
-                local tile = display.newImage( imageSheets[sets], tileNumber, (i-1)*tileWidth, (j-1)*tileHeight )
+								
+                local tile = display.newImage( imageSheets[sets], tileNumber, (i-1)*scaledTileWidth, (j-1)*scaledTileHeight)
                 --tile:setReferencePoint(display.TopLeftReferencePoint)
 								-- set other properties
                 for k, v in pairs(layerGroup.tileProperties) do
@@ -443,10 +450,10 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 		
 			for i=1, #mapData.layers[layers].objects do
 				if mapData.layers[layers].objects[i].ellipse then -- Circles
-					local ex = mapData.layers[layers].objects[i].x 
-					local ey = mapData.layers[layers].objects[i].y 
-					local ew = mapData.layers[layers].objects[i].width 
-					local eh = mapData.layers[layers].objects[i].height 
+					local ex = mapData.layers[layers].objects[i].x * contentZoomX
+					local ey = mapData.layers[layers].objects[i].y * contentZoomY
+					local ew = mapData.layers[layers].objects[i].width * contentZoomX
+					local eh = mapData.layers[layers].objects[i].height * contentZoomY
 					if (ew > eh) then
 						local ellipse = display.newCircle( layerGroup, ex + (ew / 2), ey + (eh / 2), ew / 2)
 						ellipse.yScale = (eh / ew)
@@ -483,11 +490,11 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 					end
 				elseif mapData.layers[layers].objects[i].polygon then -- Polygon
 					local points = mapData.layers[layers].objects[i].polygon
-					local polygon = display.newLine( points[1].x, points[1].y, points[2].x, points[2].y)
+					local polygon = display.newLine( points[1].x*contentZoomX, points[1].y*contentZoomY, points[2].x*contentZoomX, points[2].y*contentZoomY)
 					for i = 3, #points do
-						polygon:append(points[i].x, points[i].y)
+						polygon:append(points[i].x*contentZoomX, points[i].y*contentZoomY)
 					end
-					polygon:append(points[1].x, points[1].y)
+					polygon:append(points[1].x*contentZoomX, points[1].y*contentZoomY)
 					if layerGroup.physicsData.enabled==true then
 						local shape = {}
 						local point = 1
@@ -500,8 +507,8 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 						physics.addBody(polygon,  "static", layerGroup.physicsData)
 						layerGroup.physicsData.shape = nil
 					end
-					polygon.x = mapData.layers[layers].objects[i].x 
-					polygon.y = mapData.layers[layers].objects[i].y 		
+					polygon.x = mapData.layers[layers].objects[i].x*contentZoomX 
+					polygon.y = mapData.layers[layers].objects[i].y*contentZoomY 		
 					-- set other properties
 					for k, v in pairs(layerGroup.objectProperties) do
 						polygon[k]=layerGroup.objectProperties[k]
@@ -513,14 +520,14 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 					layerGroup:insert(polygon)
 				elseif mapData.layers[layers].objects[i].polyline then -- Lines
 					local points = mapData.layers[layers].objects[i].polyline						
-					local line = display.newLine( points[1].x, points[1].y ,points[2].x, points[2].y)
+					local line = display.newLine( points[1].x*contentZoomX, points[1].y*contentZoomY,points[2].x*contentZoomX,points[2].y*contentZoomY)
 					if #points > 2 then
 						for i = 3, #points do
 							line:append(points[i].x, points[i].y)
 						end
 					end
-					line.x = mapData.layers[layers].objects[i].x 
-					line.y = mapData.layers[layers].objects[i].y 						
+					line.x = mapData.layers[layers].objects[i].x*contentZoomX		
+					line.y = mapData.layers[layers].objects[i].y*contentZoomY						
 					local shape = {}
 					local point = 1
 					for i = 1, math.min(#points,8) do
@@ -570,18 +577,73 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 									image[k]=mapData.layers[layers].objects[i].properties[k]
 								end
 								layerGroup:insert( image )
-								image.x = mapData.layers[layers].objects[i].x 
-								image.y = mapData.layers[layers].objects[i].y	
+								image.x = mapData.layers[layers].objects[i].x * contentZoomX 
+								image.y = mapData.layers[layers].objects[i].y	* contentZoomY
 								mapData.layers[layers].objects[i].image = image
 							end
 						end
 					end
-				else -- All else fails, make a RECT
-					local rx = mapData.layers[layers].objects[i].x 
-					local ry = mapData.layers[layers].objects[i].y 
-					local rw = mapData.layers[layers].objects[i].width 
-					local rh = mapData.layers[layers].objects[i].height 	
-					local rect = display.newRect( layerGroup, rx, ry, rw, rh)
+				else -- its a RECT
+					local rx = mapData.layers[layers].objects[i].x * contentZoomX
+					local ry = mapData.layers[layers].objects[i].y * contentZoomY
+					local rw = mapData.layers[layers].objects[i].width * contentZoomX
+					local rh = mapData.layers[layers].objects[i].height * contentZoomY
+					local objType = string.lower(mapData.layers[layers].objects[i].type)
+					local rect -- Look for GUI types
+					if objType == "button" then
+						rect = display.newGroup()
+						local hitRect = display.newRect( rect, rx, ry, rw, rh)
+						hitRect.alpha = 0
+						rect.isHitTestable = true
+						local text = mapData.layers[layers].objects[i].properties.label or ""
+						local font = mapData.layers[layers].objects[i].properties.font
+						local size = tonumber(mapData.layers[layers].objects[i].properties.size)
+						local embossed = mapData.layers[layers].objects[i].properties.embossed
+						local label
+						if embossed then 
+							label = display.newEmbossedText(rect,text,rx+rw/2,ry+rh/2,font,size)
+							local color = hexToRGB(mapData.layers[layers].objects[i].properties.color)
+							if color then 
+								label:setTextColor(color.r,color.g,color.b,color.a)
+							end							
+						else
+							label = display.newText(rect,text,rx+rw/2,ry+rh/2,font,size)
+							local color = hexToRGB(mapData.layers[layers].objects[i].properties.color)
+							if color then 
+								label:setTextColor(color.r,color.g,color.b,color.a)
+							end		
+						end
+						label:setReferencePoint(display.CenterReferencePoint)
+						label.x,label.y = rx+rw/2,ry+rh/2
+					elseif objType == "text" then
+						rect = display.newGroup()
+						local hitRect = display.newRect( rect, rx, ry, rw, rh)
+						hitRect.alpha = 0
+						local text = mapData.layers[layers].objects[i].properties.text or ""
+						local font = mapData.layers[layers].objects[i].properties.font
+						local size = tonumber(mapData.layers[layers].objects[i].properties.size)
+						local embossed = mapData.layers[layers].objects[i].properties.embossed
+						local label
+						if embossed then 
+							label = display.newEmbossedText(rect,text,rx,ry,rw,rh,font,size)
+							local color = hexToRGB(mapData.layers[layers].objects[i].properties.color)
+							if color then 
+								label:setTextColor(color.r,color.g,color.b,color.a)
+							end									
+						else
+							label = display.newText(rect,text,rx,ry,rw,rh,font,size)
+							local color = hexToRGB(mapData.layers[layers].objects[i].properties.color)
+							if color then 
+								label:setTextColor(color.r,color.g,color.b,color.a)
+							end
+						end
+						label:setReferencePoint(display.CenterReferencePoint)
+						label.x,label.y = rx+rw/2,ry+rh/2
+					else -- All else fails, make a RECT
+						rect = display.newRect( rx, ry, rw, rh)
+					end
+					layerGroup:insert(rect)
+					mapData.layers[layers].objects[i].rect = rect
 					-- set Physics properties
 					if layerGroup.physicsData.enabled==true then
 						physics.addBody(rect, "static", layerGroup.physicsData)
@@ -646,6 +708,50 @@ function tiledMap:findObjects(name,mapData)
 	else
 		return objects
 	end
+end
+
+function tiledMap:findTypes(objType,mapData)
+	local mapLayers = #mapData.layers
+	local objects = {}
+	for layers=1, mapLayers do 
+		if mapData.layers[layers].type=="objectgroup" then -- search Object layer		
+			for i=1, #mapData.layers[layers].objects do
+				if mapData.layers[layers].objects[i].type == objType then
+					table.insert(objects,mapData.layers[layers].objects[i])
+				end
+			end
+		end
+	end
+	if (#objects == 1) then
+		return objects[1]
+	elseif (#objects == 0) then
+		return nil
+	else
+		return objects
+	end
+end
+
+function tiledMap:loadGUI(mapFile, listener)
+	local GUI = tiledMap:load(mapFile)
+	local newEvent = {}
+	function GUI:touch(event)
+		if event.phase == "ended" then
+			buttons = tiledMap:findTypes("button",self.data)
+			for i = 1, #buttons do
+				if event.x > buttons[i].rect.contentBounds.xMin and
+					event.x < buttons[i].rect.contentBounds.xMax and
+					event.y > buttons[i].rect.contentBounds.yMin and
+					event.y < buttons[i].rect.contentBounds.yMax then
+					newEvent.action = "clicked"
+					newEvent.name = buttons[i].name
+					listener(newEvent)
+				end
+			end
+		end
+		return true
+	end
+	GUI:addEventListener("touch", GUI)
+	return GUI
 end
 
 function tiledMap:destroy()
