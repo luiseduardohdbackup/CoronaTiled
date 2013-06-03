@@ -287,11 +287,17 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 	
 	-- Render the Map
 	
+	colorLayer = display.newRect(mapGroup,0,0,mapWidth*scaledTileWidth,mapHeight*scaledTileHeight)
+	colorLayer:setFillColor(0,0,0,0)
+	for k, v in pairs(mapData.properties) do
+    colorLayer[k]=mapData.properties[k]
+  end
+	
 	for layers=1, mapLayers do 
 		print("Processing Layer",layers)
 		if mapData.layers[layers].type=="tilelayer" then -- render tile layers
 			local layerGroup
-			if #mapData.tilesets==1 then
+			if false then -- #mapData.tilesets==1 then
 				layerGroup = display.newImageGroup( imageSheets[1] ) -- use an imageGroup
 			else
 				layerGroup = display.newGroup() -- more than one imageSheet? then use a group
@@ -577,6 +583,7 @@ function tiledMap:load( mapFile, chunkTop, chunkLeft, chunkWidth, chunkHeight)
 									image[k]=mapData.layers[layers].objects[i].properties[k]
 								end
 								layerGroup:insert( image )
+								image:setReferencePoint( display.BottomLeftReferencePoint )
 								image.x = mapData.layers[layers].objects[i].x * contentZoomX 
 								image.y = mapData.layers[layers].objects[i].y	* contentZoomY
 								mapData.layers[layers].objects[i].image = image
