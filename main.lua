@@ -30,8 +30,8 @@ local data={
 	{"Benchmarking 1", function() cleanUp() benchmarking("maps/benchmarking1.json", "Benchmarking 1") end},
 	{"Benchmarking 2", function() cleanUp() benchmarking("maps/benchmarking2.json", "Benchmarking 2") end},
 	{"Sample 1: Simple Maze", function() cleanUp() maze() end},
-	{"Sample 1: Simple Maze", function() cleanUp() pathfinding() end},
-	{"Sample 1: Simple Maze", function() cleanUp() platformer() end},
+	{"Sample 2: Pathfinding", function() cleanUp() pathfinding() end},
+	{"Sample 3: Simple Platformer", function() cleanUp() platformer() end},
 }
 
 --------------------------------------------------------------------------------
