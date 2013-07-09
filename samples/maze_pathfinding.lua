@@ -39,10 +39,10 @@ return function()
 		for x=1, map("mapWidth") do
 			if map.layer["layer1"].tile(x, y) then
 				mapGrid[y][x]=1
-				str=str.."###"
+				str=str.."##"
 			else
 				mapGrid[y][x]=0
-				str=str.."   "
+				str=str.."  "
 			end
 		end
 	end
@@ -57,7 +57,7 @@ return function()
 	------------------------------------------------------------------------------
 	local playerXY=map.layer["layer1"].playerSpawn
 
-	local player=display.newImageRect("assets/circle.png", 32, 32)
+	local player=display.newImageRect("assets/player.png", 32, 32)
 	player.x=(playerXY[1]-0.5)*map("tileWidth")
 	player.y=(playerXY[2]-0.5)*map("tileHeight")
 
