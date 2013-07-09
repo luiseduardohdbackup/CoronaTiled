@@ -24,7 +24,7 @@ return function()
 	bkg:setFillColor(255, 0, 255)
 
 	local ceramic=require("Ceramic")
-	local map=ceramic.buildMap("maps/mario_1.json")
+	local map=ceramic.buildMap("maps/platformer.json")
 
 	------------------------------------------------------------------------------
 	-- Create Player
