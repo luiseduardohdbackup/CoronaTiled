@@ -10,8 +10,8 @@ v1.0
 -- Miscellaneous Loading
 --------------------------------------------------------------------------------
 display.setStatusBar( display.HiddenStatusBar )
-display.setDefault("minTextureFilter", "linear")
-display.setDefault("magTextureFilter", "linear")
+display.setDefault("minTextureFilter", "nearest")
+display.setDefault("magTextureFilter", "nearest")
 
 local cleanUp
 local widget=require("widget")

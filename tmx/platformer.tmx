@@ -27,6 +27,22 @@
    </properties>
   </tile>
  </tileset>
+ <layer name="bkg2" width="64" height="24">
+  <properties>
+   <property name="xParallax" value="0.5"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztlrENACAMw6L+v8AncCHsbKgtRbIPaOwBCQkAAACgLs2kbq8tTrK8xt6YBfuzvOin/3Yn8o3+0B/pSD/99Mfc9tqhn376fX0ybnvtVP07wlsWhCozJA==
+  </data>
+ </layer>
+ <layer name="bkg" width="64" height="24">
+  <properties>
+   <property name="xParallax" value="0.75"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztlLkNwCAMAC32b2CTZEIo6ZAc/BDuWuTnLBsRAAAAuJVaRFqJ7iKOZ7i/m/1PmqmFv0VOKzL6e+5PRn9NvHZmf/HX1sQff2//1a1m8tf8K6ucX993xUT1gj/++PvWBJjp1HNRPg==
+  </data>
+ </layer>
  <layer name="layer_1" width="64" height="24">
   <data encoding="base64" compression="zlib">
    eJztllEOwyAIhul6693B7UDrTtLuLnMPJoaA+20x1ioJL8YKH/5QiYa1ZG4mejB/zrWzur5JdZdqr+3LuafXRLR4f0/2HC3Y6rk3758K/KH2S8U7QPhLaSTE3hI5WMZ2Qm8g/KU0gvCX1ufg38fvDP6JOfzxrEB6Ae2bVu5//bNvb8498UuayJn/kv5y5/P9hnvIL45xhB9d086S6n9EG+j9I/u0s6/Mn9KeBT/X3dn4U7E1VqmXkTNa4v/NDo1fOmvwY28PSSu1+LmO4zlgzc91cAZ+vhZ/X5qfv0V740/FHvy68X7tzXnNevMvDAwQfg==

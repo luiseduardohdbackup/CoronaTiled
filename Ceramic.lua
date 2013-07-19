@@ -695,8 +695,10 @@ local function generateMap(mapFile, useBasic)
 			tprint("Opacity: "..tostring(layer.alpha))
 
 			layer.trackingEnabled=(props.layer.trackingEnabled==nil and true) or props.layer.trackingEnabled
-			layer.xParallax=(props.layer.xParallax==nil and 1) or props.layer.xParallax
-			layer.yParallax=(props.layer.yParallax==nil and 1) or props.layer.yParallax
+			
+			layer.xParallax=props.layer.xParallax or props.layer.parallax or 1
+			layer.yParallax=props.layer.yParallax or props.layer.parallax or 1
+			
 			layer._type=mapData.layers[i].type
 			table.insert(map.layer, layer)
 			map.layer[layer._name]=layer
